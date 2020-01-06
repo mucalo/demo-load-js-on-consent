@@ -1,0 +1,79 @@
+<html>
+    <head>
+        <title>Demo for loading scripts on user consent</title>
+        <script type="text/javascript" src="loadScriptsAsync.js"></script>
+    </head>
+    <body>
+        <h1>Demo for loading scripts on user consent</h1>
+        <ol>
+            <li>Open the Network inspector</li>
+            <li>Clear the list</li>
+            <li>Refresh the page so you can see nothing has been loaded</li>
+            <li>Click buttons on the left and follow network traffic and console outputs</li>
+        </ol>
+        <div>
+            <h2>Scenario 1: Load Google Maps and use the callback parameter</h2>
+            <p>This will load Google Maps and call the initMap function after loading is complete.</p>
+            <button onclick="loadGoogleMaps();">Load GoogleMaps</button>
+
+            <h2>Scenario 2: Append a script to the head element and just use it</h2>
+            <p>This will append the script element to the head element, and attempt to use a function from it. Due to the asynchronous nature of JS, this will result with an Uncaught ReferenceError, as the script has not finished loading yet at the time it has been called.</p>
+            <button onclick="loadMyScriptAndUseImmediately()">Load MyScript.js and use immediately</button>
+
+            <h2>Scenario 3: Append a script to the head and supply the callback</h2>
+            <p>This will append the script element to the head element, and add a callback function to its onload and onstagechange events. The callback function calls functions from MyScript.js and this works fine, as the callback is called once the script has been loaded.</p>
+            <button onclick="loadMyScriptWithCallback()">Load MyScript2.js with callback</button>
+        </div>
+        <script>
+            /**
+             * Function to be called once GoogleMaps is loaded successfully.
+             */ 
+            function initMap() {
+                console.log("Loaded Google Maps successfully, we can now do stuff with it");
+                console.log(window.google);
+            }
+
+            /**
+             * Function to be called once MyScript is loaded successfully.
+             */
+            function onLoadMyScript() {
+                console.log("Loaded MyScript successfully, we can now do stuff with it.");
+                console.log(getValueToLogFromMyScript());
+            }
+
+            /**
+             * Function to be called once MyScript is loaded successfully.
+             */
+            function onLoadMyScript2() {
+                console.log("Loaded MyScript2 successfully, we can now do stuff with it.");
+                console.log(getValueToLogFromMyScript2());
+            }
+
+            /**
+             * Function appends the Google Maps script element to the head and sets the initMap function to be called on callback
+             */
+            function loadGoogleMaps() {
+                appendScriptToHeadElement("https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY_HERE&callback=initMap")
+            }
+
+            /**
+             * Function appends the script element to the head, but then makes an immediate call to functions from it.
+             * Due to asynchronous behaviour, this should throw an Uncahugt ReferenceError.
+             */
+            function loadMyScriptAndUseImmediately() {
+                appendScriptToHeadElement("MyScript.js");
+                console.log("Called appendScriptToHeadElement, now attempting to use the script...");
+                console.log(getValueToLogFromMyScript());
+            }
+
+            /**
+             * Function appends the script element to the head, and sets the callback function
+             * This is the proper way to do it!
+             */
+            function loadMyScriptWithCallback() {
+                var element = appendScriptToHeadElement("MyScript2.js");
+                addCallbackMethod(element, onLoadMyScript2);
+            }
+        </script>
+    </body>
+</html>
